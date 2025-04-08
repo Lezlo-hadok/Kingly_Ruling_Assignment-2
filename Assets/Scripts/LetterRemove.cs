@@ -29,8 +29,18 @@ namespace Letters
         public GameObject characterDisplayPrefab;
         public Transform spawanLocation;
         public Text[] textDisplay;
+        public GameObject gameSpace;
 
         void Start()
+        {
+            if (gameSpace == true)
+            {
+                SavePlay();
+                return;
+            }
+        }
+
+        void SavePlay()
         {
             SelectTextFile();
             chosenWord = SplitTextFile(ReadTextFile());
@@ -39,7 +49,7 @@ namespace Letters
             textDisplay = new Text[charaters.Length];
             for (int i = 0; i < charaters.Length; i++)
             {
-                Text currentLetter = Instantiate(characterDisplayPrefab).GetComponentInChildren<Text>();
+                Text currentLetter = Instantiate(characterDisplayPrefab,spawanLocation).GetComponentInChildren<Text>();
                 textDisplay[i] = currentLetter;
             }
 
