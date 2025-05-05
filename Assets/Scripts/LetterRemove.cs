@@ -5,7 +5,7 @@ namespace Letters
     using System.IO;
     using UnityEngine.UI;
     using System.Collections.Generic;
-    using TMPro;
+    
 
     public class LetterRemove : MonoBehaviour
     {
@@ -35,19 +35,41 @@ namespace Letters
         public Text[] textDisplay;
         public GameObject gameSpace;
 
+        //list of letters guessed correctly
         public List<string> lettersGuessed;
+
+        //list of letters guessed incorrectly
         public List<string> lettersWrong;
 
         public List<Text> prefabSpawnedText;
+
+        //attempts remaining spawn for counter
+        public GameObject AttemptsNprefab;
+        public Transform spawnLocationAttempts;
+        public Text[] textDisplayAttempts;
+
+        //attempts remaining
+        public int attemptsRemaining;
+
+        public List<Text> attemptsN;
         
+        //player score to display
         public int playerScore;  
+
+        //weather game is over 
+        private bool gameOver;
 
         void Start()
         {
+            playerScore = 0;
+            gameOver = false;
+            AttemptsRemaining(GetAttemptsRemaining());
             if (gameSpace == true)
             {
                 SavePlay();
-                //WinCondition();
+                attemptsRemaining = 6;
+                AttemptsRemaining(GetAttemptsRemaining());
+                
                 return;
                 
             }
@@ -56,14 +78,32 @@ namespace Letters
         //press button
         private void OnGUI()
         {
-           
-            KeyPressed();
+
+            if (!gameOver)
+            {
+                if (attemptsRemaining != 0)
+                {
+                    KeyPressed();
+                }
+                else
+                {
+                    Debug.Log("Game over");
+                    gameOver = true;
+                }
+            }
+
+
         }
 
+        /// <summary>
+        /// when any letter key is pressed then allow for letter to move to the wrong or right pile point for the collection of letters
+        /// </summary>
         void KeyPressed()
         {
+            //check using var if something is active
             Event currentEvent = Event.current;
 
+            //check the key code on the keyboard
             if (currentEvent.isKey && Input.GetKeyDown(currentEvent.keyCode) && currentEvent.keyCode.ToString().Length == 1 && char.IsLetter(currentEvent.keyCode.ToString()[0]))
             {
                 
@@ -75,8 +115,8 @@ namespace Letters
                 }
                 else if (chosenWord.Contains((char)currentEvent.keyCode))
                 {
-                    Debug.Log("hi");
-
+                    
+                    //check to see if letter guessed is in word
                     lettersGuessed.Add(currentEvent.keyCode.ToString());
                     for (int i = 0; i < chosenWord.Length; i++)
                     {
@@ -85,14 +125,20 @@ namespace Letters
                             prefabSpawnedText[i].text = currentEvent.keyCode.ToString();
                         }
                     }
+                    //checks to see if condition for winning is met
+                    WinCondition();
                 }
+                //adds letters wrong to a list for use as a text point to show letters guessed
                 if (!chosenWord.Contains((char)currentEvent.keyCode))
                 {
                     lettersWrong.Add(currentEvent.keyCode.ToString());
+                    
+                    attemptsRemaining -= 1;
                 }
+                //to show letter guessed was already guessed 
                 if (lettersWrong.Contains(currentEvent.keyCode.ToString()))
                 {
-                    Debug.Log("letter already guessed");
+                    Debug.Log("letter already guessed attempt lost");
                 }
 
             }
@@ -102,11 +148,16 @@ namespace Letters
         //saved words 
         void SavePlay()
         {
+            //clears the prefab play point
             prefabSpawnedText.Clear();
-            SelectTextFile();
-            chosenWord = SplitTextFile(ReadTextFile());
-            charaters = chosenWord.ToCharArray();
-            Debug.Log(charaters.Length);
+
+            //get a word from a text file
+            SelectTextFile(); //pulls fuction
+            chosenWord = SplitTextFile(ReadTextFile()); //pulls funtion
+            charaters = chosenWord.ToCharArray(); //changes word to an array of charaters
+            Debug.Log(charaters.Length); //shows the amount of charaters in the debug log
+
+            //shows the text display of teh chartater point
             textDisplay = new Text[charaters.Length];
             for (int i = 0; i < charaters.Length; i++)
             {
@@ -115,21 +166,12 @@ namespace Letters
                 prefabSpawnedText.Add(currentLetter);
             }
 
-            //if (chosenWord.Contains('a'))
-            //{
-            //    Debug.Log("there is an a");
-            //    foreach (char letter in charaters)
-            //    {
-            //        if (letter == 'a')
-            //        {
-            //            Debug.Log("a was found");
-            //        }
-            //    }
 
         }
+        //choses a random word from a random difficulty
         void SelectTextFile()
         {
-            //WordsAsset.;
+            
             selectedDifficultyIndex = Random.Range(0, difficulty.Length);
             selectedDifficulty = difficulty[selectedDifficultyIndex];
             filePath = $"{Application.dataPath}/Words/{selectedDifficulty}.txt";
@@ -150,15 +192,79 @@ namespace Letters
             return chooseWord;
         }
 
-        //see what happens to win
-        //void PlayerSuccess()
+        private int GetAttemptsRemaining()
+        {
+            return attemptsRemaining;
+        }
+
+        //attempts remaining
+        //void AttemptsRemaining()
         //{
-        //    if (prefabSpawnedText.ToString == lettersGuessed.ToString())
+        //   foreach (char lettersWrong in )
         //    {
 
         //    }
-           
+
+        //    //if (attemptsRemaining == 0) 
+        //    //{
+        //    //    Debug.Log("this now work");
+        //    //}
+
         //}
+
+        //this dooesnt currently work proporly
+        void AttemptsRemaining(int attemptsRemaining)
+        {
+            //clears the display on 
+            foreach (Text t in attemptsN)
+            {
+                Destroy(t.gameObject);
+            }
+            attemptsN.Clear();
+
+            
+
+            // Display remaining attempts
+            string attemptsText = attemptsRemaining.ToString();
+            Text newText = Instantiate(AttemptsNprefab, spawnLocationAttempts).GetComponentInChildren<Text>();
+            newText.text = attemptsText;
+            Text[] texts = new Text[attemptsRemaining];
+            textDisplay = texts;
+            attemptsN.Add(newText);
+
+            if (attemptsRemaining <= 0)
+            {
+                Debug.Log("Game Over! The word was: " + chosenWord);
+                
+            }
+        }
+
+
+
+
+        //win condidtion
+        void WinCondition()
+        {
+            foreach (char c in chosenWord)
+            {
+                if (!lettersGuessed.Contains(c.ToString().ToUpper()) && !lettersGuessed.Contains(c.ToString().ToLower()))
+                {
+                    return;
+                }
+            }
+
+            Debug.Log("You Win!");
+            gameOver = true;
+            playerScore += 1;
+            
+        }
+
+        ////continue to next word?
+        //void AfterWin()
+        //{
+            
+        //}
+
 
     }
 }
