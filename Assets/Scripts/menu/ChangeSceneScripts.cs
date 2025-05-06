@@ -1,3 +1,4 @@
+using Letters;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 public class ChangeSceneScripts : MonoBehaviour
@@ -22,6 +23,14 @@ public class ChangeSceneScripts : MonoBehaviour
     public void LoadNextScene()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex+1);
+    }
+    public void SelectDif(int i)
+    {
+        LetterRemove.chosenDifficulty = i;
+    }
+    public void ResetScore()
+    {
+        LetterRemove.playerScore = 0; //set the player score to 0 
     }
 
 }

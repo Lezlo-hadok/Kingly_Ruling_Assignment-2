@@ -18,77 +18,105 @@ namespace Letters
         /// </summary>
 
        //dificulty
-        public string[] difficulty;
-        public string selectedDifficulty;
-        public int selectedDifficultyIndex;
-        
+        public string[] difficulty; //creates array for difficulty
+        public string selectedDifficulty; //variable used to select difficluty
+        public int selectedDifficultyIndex;//selected difficulty varible
+        public static int chosenDifficulty = 0;
         //find file for difficulty
         string filePath;
 
         //find word in difficulty
-        public string chosenWord;
-        public char[] charaters;
+        public string chosenWord; // word chosen from difficluty
+        public char[] charaters; // to have charaters seperate from chosen word as a charater array
 
         //display prefabs
-        public GameObject characterDisplayPrefab;
-        public Transform spawanLocation;
-        public Text[] textDisplay;
-        public GameObject gameSpace;
+        public GameObject characterDisplayPrefab; //prefab for display
+        public Transform spawanLocation; //Spawn location area
+        public Text[] textDisplay; // text to be displayed as an array
+        public GameObject gameSpace; //the gamepspace
 
         //list of letters guessed correctly
-        public List<string> lettersGuessed;
+        public List<string> lettersGuessed;//creates a list for letters guessed that is used to check agaisnt the letters that are correct
 
         //list of letters guessed incorrectly
-        public List<string> lettersWrong;
+        public List<string> lettersWrong; //list for checking the letters guessed that are wrong (will not be displayed)
 
-        public List<Text> prefabSpawnedText;
+        public List<Text> prefabSpawnedText; //list for what the text displayed will say as seprate letters
 
-        //attempts remaining spawn for counter
-        public GameObject AttemptsNprefab;
-        public Transform spawnLocationAttempts;
-        public Text[] textDisplayAttempts;
-
+        
         //attempts remaining
-        public int attemptsRemaining;
-
-        public List<Text> attemptsN;
+        public int attemptsRemaining; //number of attemps remaining
+        public Text attemptsText; //for displaying attempts
         
         //player score to display
-        public int playerScore;  
+        public static int playerScore; // player score varible
+        public Text scoreText; //for displaying varible
 
         //weather game is over 
-        private bool gameOver;
+        private bool gameOver; //see if game is over
 
-        void Start()
+        //win and continue
+        private bool hasWon; //see if game has been won
+
+        //show win and lose screen
+        public GameObject winScreen; //for showing win screen
+        public GameObject loseScreen; //for showing win screen
+
+        //Continue button
+        public Button btnContinue; //button varible to add code to
+
+        private void Start()//on game start
         {
-            playerScore = 0;
-            gameOver = false;
-            AttemptsRemaining(GetAttemptsRemaining());
-            if (gameSpace == true)
+            
+            this.winScreen.SetActive(false);//set the win screen to off 
+            this.loseScreen.SetActive(false);//set the lose screen to off
+            gameOver = false; //set game over to off
+            AttemptsRemaining(GetAttemptsRemaining()); //display the number of attemps remaining as a number
+            PlayerScoreChange(GetPlayerScore()); //display the current score from words in difficulty selected
+            
+            if (hasWon)// open loop //see if the player has won the game
             {
-                SavePlay();
-                attemptsRemaining = 6;
-                AttemptsRemaining(GetAttemptsRemaining());
+                NewWord();//attenpt point
+            }//end loop
+
+            if (gameSpace == true)//open loop //see if the gamespace is there
+            {
+                SavePlay();//function for the words to spawn and be chosen from difficulty
+                
                 
                 return;
                 
+            }//end loop
+            if (Input.GetKeyDown(KeyCode.Space)) //attempt point
+            {
+                Debug.Log("you pressed continue");
+                SavePlay();
+
             }
+
+
+
+            
+
         }
 
         //press button
-        private void OnGUI()
+        private void OnGUI() //open void for when a gui ellement is input
         {
 
-            if (!gameOver)
+            if (!gameOver)//open loop //check if game over and pplayer has lost
             {
-                if (attemptsRemaining != 0)
+                if (attemptsRemaining != 0)//open loop// check to see if attemps remaining is not zero
                 {
-                    KeyPressed();
-                }
-                else
+                    KeyPressed();//fucntion for pressing keys
+                    
+                }//end loop
+                else //open loop
                 {
                     Debug.Log("Game over");
                     gameOver = true;
+                    this.loseScreen.SetActive(true);
+                    playerScore = 0;
                 }
             }
 
@@ -123,6 +151,7 @@ namespace Letters
                         if (chosenWord[i].ToString().ToLower() == currentEvent.keyCode.ToString().ToLower())
                         {
                             prefabSpawnedText[i].text = currentEvent.keyCode.ToString();
+                            
                         }
                     }
                     //checks to see if condition for winning is met
@@ -134,6 +163,8 @@ namespace Letters
                     lettersWrong.Add(currentEvent.keyCode.ToString());
                     
                     attemptsRemaining -= 1;
+                    AttemptsRemaining(GetAttemptsRemaining());
+
                 }
                 //to show letter guessed was already guessed 
                 if (lettersWrong.Contains(currentEvent.keyCode.ToString()))
@@ -166,13 +197,14 @@ namespace Letters
                 prefabSpawnedText.Add(currentLetter);
             }
 
-
+            attemptsRemaining = 6;
+            AttemptsRemaining(GetAttemptsRemaining());
         }
         //choses a random word from a random difficulty
         void SelectTextFile()
         {
             
-            selectedDifficultyIndex = Random.Range(0, difficulty.Length);
+            selectedDifficultyIndex = chosenDifficulty;
             selectedDifficulty = difficulty[selectedDifficultyIndex];
             filePath = $"{Application.dataPath}/Words/{selectedDifficulty}.txt";
             Debug.Log(filePath);
@@ -194,50 +226,28 @@ namespace Letters
 
         private int GetAttemptsRemaining()
         {
+
             return attemptsRemaining;
         }
 
-        //attempts remaining
-        //void AttemptsRemaining()
-        //{
-        //   foreach (char lettersWrong in )
-        //    {
-
-        //    }
-
-        //    //if (attemptsRemaining == 0) 
-        //    //{
-        //    //    Debug.Log("this now work");
-        //    //}
-
-        //}
-
-        //this dooesnt currently work proporly
+        //shows attempts dislpay
         void AttemptsRemaining(int attemptsRemaining)
         {
-            //clears the display on 
-            foreach (Text t in attemptsN)
-            {
-                Destroy(t.gameObject);
-            }
-            attemptsN.Clear();
-
-            
-
-            // Display remaining attempts
-            string attemptsText = attemptsRemaining.ToString();
-            Text newText = Instantiate(AttemptsNprefab, spawnLocationAttempts).GetComponentInChildren<Text>();
-            newText.text = attemptsText;
-            Text[] texts = new Text[attemptsRemaining];
-            textDisplay = texts;
-            attemptsN.Add(newText);
-
-            if (attemptsRemaining <= 0)
-            {
-                Debug.Log("Game Over! The word was: " + chosenWord);
-                
-            }
+            attemptsText.text = attemptsRemaining.ToString();
         }
+
+
+        private int GetPlayerScore()
+        {
+            return playerScore;
+        }
+
+        void PlayerScoreChange(int playerScore)
+        {
+            scoreText.text = playerScore.ToString();
+        }
+
+
 
 
 
@@ -252,19 +262,46 @@ namespace Letters
                     return;
                 }
             }
-
+            
             Debug.Log("You Win!");
             gameOver = true;
+            hasWon = true;
             playerScore += 1;
+            PlayerScoreChange(GetPlayerScore());
+            AfterWin();
             
         }
 
-        ////continue to next word?
-        //void AfterWin()
+        //continue to next word?
+        void AfterWin()
+        {
+            if (hasWon)
+            {
+                this.winScreen.SetActive(true);
+                NewWord();
+            }
+        }
+
+        void NewWord()
+        {
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                Debug.Log("you pressed continue");
+                SavePlay();
+                
+            }
+        }
+
+        //void ContinueButton()
         //{
-            
+        //    Button btn = btnContinue.GetComponet<Button>();
+        //    btn.onClick.AddListener(OnContinueClick);
         //}
 
+        //void OnContinueClick()
+        //{
+        //    Debug.Log("Button clicked");
+        //}
 
     }
 }
