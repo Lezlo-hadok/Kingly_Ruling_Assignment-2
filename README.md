@@ -13,13 +13,13 @@ UI
 5.  submit button for guesses  - y? submit button is the letter input itself
 
 Game Flow
-1. end of each gme round will allow for a start new game and a end game - in progress
+1. end of each game round will allow for a start new game and a end game - y
 
 saving and oading
-1. the game will support saving and loading for
+1. the game will support saving and loading for - n
         - current word 
         - letters guessed
         - remaining guesses
-3.  data will be stored in JSON file 
+3.  data will be stored in JSON file - n
 
     
