@@ -17,7 +17,7 @@ Game Flow
 
 saving and oading
 1. the game will support saving and loading for
-2.     - current word 
+        - current word 
         - letters guessed
         - remaining guesses
 3.  data will be stored in JSON file 
