@@ -1,4 +1,4 @@
-namespace Letters
+namespace Letters //namespace
 {
     
     using UnityEngine;
@@ -37,15 +37,17 @@ namespace Letters
 
         //list of letters guessed correctly
         public List<string> lettersGuessed;//creates a list for letters guessed that is used to check agaisnt the letters that are correct
+        public string letterHold;
 
         //list of letters guessed incorrectly
         public List<string> lettersWrong; //list for checking the letters guessed that are wrong (will not be displayed)
+        private string wrongLetter;//to string the list of wrong letters
 
         public List<Text> prefabSpawnedText; //list for what the text displayed will say as seprate letters
 
         
         //attempts remaining
-        public int attemptsRemaining; //number of attemps remaining
+        public static int attemptsRemaining; //number of attemps remaining
         public Text attemptsText; //for displaying attempts
         
         //player score to display
@@ -55,50 +57,42 @@ namespace Letters
         //weather game is over 
         private bool gameOver; //see if game is over
 
-        //win and continue
-        private bool hasWon; //see if game has been won
+        
 
         //show win and lose screen
-        public GameObject winScreen; //for showing win screen
-        public GameObject loseScreen; //for showing win screen
+        public GameObject _winScreen; //for showing win screen
+        public GameObject _loseScreen; //for showing win screen
 
-        //Continue button
-        public Button btnContinue; //button varible to add code to
+        //for letter display
+        public Text _wrongGuesses;//for displaying letter wrong
+
+        //for lost word display when player loses
+        public Text _lostWord;//for displaying word guessed wrong
+
+        //for displaying and holding letter
+        public Text _letterConfirm;//display the letter for confirming
+        private string pendingLetter = "";
+
 
         private void Start()//on game start
         {
             
-            this.winScreen.SetActive(false);//set the win screen to off 
-            this.loseScreen.SetActive(false);//set the lose screen to off
+           
+            this._winScreen.SetActive(false);//set the win screen to off 
+            this._loseScreen.SetActive(false);//set the lose screen to off
             gameOver = false; //set game over to off
             AttemptsRemaining(GetAttemptsRemaining()); //display the number of attemps remaining as a number
             PlayerScoreChange(GetPlayerScore()); //display the current score from words in difficulty selected
-            
-            if (hasWon)// open loop //see if the player has won the game
-            {
-                NewWord();//attenpt point
-            }//end loop
+            //GuessedWrongDisplay(GetGuessedDisplay());
 
             if (gameSpace == true)//open loop //see if the gamespace is there
             {
                 SavePlay();//function for the words to spawn and be chosen from difficulty
-                
-                
                 return;
                 
             }//end loop
-            if (Input.GetKeyDown(KeyCode.Space)) //attempt point
-            {
-                Debug.Log("you pressed continue");
-                SavePlay();
-
-            }
-
-
-
-            
-
         }
+        
 
         //press button
         private void OnGUI() //open void for when a gui ellement is input
@@ -113,10 +107,10 @@ namespace Letters
                 }//end loop
                 else //open loop
                 {
-                    Debug.Log("Game over");
-                    gameOver = true;
-                    this.loseScreen.SetActive(true);
-                    playerScore = 0;
+                    
+                    gameOver = true; //see if game is not lost
+                    this._loseScreen.SetActive(true); //turn on lose 
+                    _lostWord.text = ($"Your word was: {chosenWord}"); //show what the word was on lose
                 }
             }
 
@@ -126,55 +120,117 @@ namespace Letters
         /// <summary>
         /// when any letter key is pressed then allow for letter to move to the wrong or right pile point for the collection of letters
         /// </summary>
+        //void KeyPressed()
+        //{
+        //    //check using var if something is active
+        //    Event currentEvent = Event.current;
+
+        //    //check the key code on the keyboard
+        //    if (currentEvent.isKey && Input.GetKeyDown(currentEvent.keyCode) && currentEvent.keyCode.ToString().Length == 1 && char.IsLetter(currentEvent.keyCode.ToString()[0])) //open if for input of charater, current event key code, 
+        //    {
+
+        //        if (!gameOver)
+        //        {
+        //            Debug.Log(currentEvent.keyCode);
+        //            if (lettersGuessed.Contains(currentEvent.keyCode.ToString()))
+        //            {
+        //                Debug.Log("letter already guessed");
+        //            }
+        //            else if (chosenWord.Contains((char)currentEvent.keyCode))
+        //            {
+
+        //                //check to see if letter guessed is in word
+        //                lettersGuessed.Add(currentEvent.keyCode.ToString());
+        //                for (int i = 0; i < chosenWord.Length; i++)
+        //                {
+        //                    if (chosenWord[i].ToString().ToLower() == currentEvent.keyCode.ToString().ToLower())
+        //                    {
+        //                        prefabSpawnedText[i].text = currentEvent.keyCode.ToString();
+
+        //                    }
+        //                }
+        //                //checks to see if condition for winning is met
+        //                WinCondition();
+        //            }
+        //            //adds letters wrong to a list for use as a text point to show letters guessed
+        //            if (!chosenWord.Contains((char)currentEvent.keyCode))
+        //            {
+        //                lettersWrong.Add(currentEvent.keyCode.ToString());
+
+        //                _wrongGuesses.text = "";
+        //                foreach (string wrongLetters in lettersWrong)
+        //                {
+        //                    _wrongGuesses.text += (wrongLetters + " ");
+        //                }
+
+        //                attemptsRemaining -= 1;
+        //                AttemptsRemaining(GetAttemptsRemaining());
+
+        //            }
+        //            //to show letter guessed was already guessed 
+        //            if (lettersWrong.Contains(currentEvent.keyCode.ToString()))
+        //            {
+        //                Debug.Log("letter already guessed attempt lost");
+        //            }
+        //        }
+        //    }
+
+        //}
+
         void KeyPressed()
         {
-            //check using var if something is active
-            Event currentEvent = Event.current;
+            Event currentEvent = Event.current;//
 
-            //check the key code on the keyboard
-            if (currentEvent.isKey && Input.GetKeyDown(currentEvent.keyCode) && currentEvent.keyCode.ToString().Length == 1 && char.IsLetter(currentEvent.keyCode.ToString()[0]))
+            if (currentEvent.isKey && Input.GetKeyDown(currentEvent.keyCode))
             {
-                
+                KeyCode key = currentEvent.keyCode;
 
-                    Debug.Log(currentEvent.keyCode);
-                if (lettersGuessed.Contains(currentEvent.keyCode.ToString()))
+                // Check for ENTER key
+                if (key == KeyCode.Return || key == KeyCode.KeypadEnter)
                 {
-                    Debug.Log("letter already guessed");
-                }
-                else if (chosenWord.Contains((char)currentEvent.keyCode))
-                {
-                    
-                    //check to see if letter guessed is in word
-                    lettersGuessed.Add(currentEvent.keyCode.ToString());
-                    for (int i = 0; i < chosenWord.Length; i++)
+                    if (!gameOver && !string.IsNullOrEmpty(pendingLetter))
                     {
-                        if (chosenWord[i].ToString().ToLower() == currentEvent.keyCode.ToString().ToLower())
+                        string inputLetter = pendingLetter.ToLower();
+                        _letterConfirm.text = ""; // clear letter display
+
+                        if (lettersGuessed.Contains(inputLetter) || lettersWrong.Contains(inputLetter))
                         {
-                            prefabSpawnedText[i].text = currentEvent.keyCode.ToString();
-                            
+                            Debug.Log("Letter already guessed.");
+                            return;
                         }
+
+                        if (chosenWord.ToLower().Contains(inputLetter))
+                        {
+                            lettersGuessed.Add(inputLetter);
+                            for (int i = 0; i < chosenWord.Length; i++)
+                            {
+                                if (chosenWord[i].ToString().ToLower() == inputLetter)
+                                {
+                                    prefabSpawnedText[i].text = inputLetter.ToUpper();
+                                }
+                            }
+                            WinCondition();
+                        }
+                        else
+                        {
+                            lettersWrong.Add(inputLetter);
+                            _wrongGuesses.text = string.Join(" ", lettersWrong);
+                            attemptsRemaining -= 1;
+                            AttemptsRemaining(GetAttemptsRemaining());
+                        }
+
+                        pendingLetter = ""; // clear after processing
                     }
-                    //checks to see if condition for winning is met
-                    WinCondition();
                 }
-                //adds letters wrong to a list for use as a text point to show letters guessed
-                if (!chosenWord.Contains((char)currentEvent.keyCode))
+                // If letter key pressed (and not Enter), store the letter
+                else if (key.ToString().Length == 1 && char.IsLetter(key.ToString()[0]))
                 {
-                    lettersWrong.Add(currentEvent.keyCode.ToString());
-                    
-                    attemptsRemaining -= 1;
-                    AttemptsRemaining(GetAttemptsRemaining());
-
+                    pendingLetter = key.ToString().ToLower();
+                    _letterConfirm.text = $"{pendingLetter}";
                 }
-                //to show letter guessed was already guessed 
-                if (lettersWrong.Contains(currentEvent.keyCode.ToString()))
-                {
-                    Debug.Log("letter already guessed attempt lost");
-                }
-
             }
-             
         }
+
 
         //saved words 
         void SavePlay()
@@ -192,6 +248,7 @@ namespace Letters
             textDisplay = new Text[charaters.Length];
             for (int i = 0; i < charaters.Length; i++)
             {
+                
                 Text currentLetter = Instantiate(characterDisplayPrefab,spawanLocation).GetComponentInChildren<Text>();
                 textDisplay[i] = currentLetter;
                 prefabSpawnedText.Add(currentLetter);
@@ -199,7 +256,11 @@ namespace Letters
 
             attemptsRemaining = 6;
             AttemptsRemaining(GetAttemptsRemaining());
+            
         }
+
+       
+
         //choses a random word from a random difficulty
         void SelectTextFile()
         {
@@ -246,12 +307,7 @@ namespace Letters
         {
             scoreText.text = playerScore.ToString();
         }
-
-
-
-
-
-
+        
         //win condidtion
         void WinCondition()
         {
@@ -265,43 +321,20 @@ namespace Letters
             
             Debug.Log("You Win!");
             gameOver = true;
-            hasWon = true;
+            
             playerScore += 1;
             PlayerScoreChange(GetPlayerScore());
-            AfterWin();
+            this._winScreen.SetActive(true); ;
+            
             
         }
 
-        //continue to next word?
-        void AfterWin()
-        {
-            if (hasWon)
-            {
-                this.winScreen.SetActive(true);
-                NewWord();
-            }
-        }
+           
+        
+        
+        
+        
 
-        void NewWord()
-        {
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                Debug.Log("you pressed continue");
-                SavePlay();
-                
-            }
-        }
-
-        //void ContinueButton()
-        //{
-        //    Button btn = btnContinue.GetComponet<Button>();
-        //    btn.onClick.AddListener(OnContinueClick);
-        //}
-
-        //void OnContinueClick()
-        //{
-        //    Debug.Log("Button clicked");
-        //}
 
     }
 }
