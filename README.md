@@ -1,4 +1,6 @@
-ReadMe Added for a list of requirements as a checklist
+the game has a major issue with the prefab not spawing in the build or between the edior and the overall editor without manual setting the prefab
+
+ReadMe Added for a list of requirements as a checklist from the GDD
 Gameplay
 1. one letter inputs - y
 2. correct guesses reveal level - y
@@ -8,7 +10,7 @@ Gameplay
 UI
 1. remaining guesses - y
 2. the letters in teh word show as the player guesses the word - y
-3.  visual feedback for the incorrect and correct letter - n
+3.  visual feedback for the incorrect and correct letter - y
 4.  input for letters - y
 5.  submit button for guesses  - y? submit button is the letter input itself
 
@@ -16,10 +18,11 @@ Game Flow
 1. end of each game round will allow for a start new game and a end game - y
 
 saving and oading
-1. the game will support saving and loading for - n
+1. the game will support saving and loading for - y
         - current word 
         - letters guessed
         - remaining guesses
-3.  data will be stored in JSON file - n
+        - added one other
+3.  data will be stored in JSON file - y
 
     
