@@ -7,11 +7,12 @@ public class ChangeSceneScripts : MonoBehaviour
 {
     [System.Serializable]
     
-    public class SaveData
+    public class SaveData //varible determain
     {
         public int chosenDifficulty;
         public int playerScore;
         public int attemptsRemaining;
+        public string chosenWord;
     }
 
 
@@ -40,7 +41,7 @@ public class ChangeSceneScripts : MonoBehaviour
     }
     public void LoadPreviousScene()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex-1);
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex-1);//loads the previous scene
     }
     public void SelectDif(int i)
     {
@@ -55,14 +56,14 @@ public class ChangeSceneScripts : MonoBehaviour
         LetterRemove.attemptsRemaining = 6;//sets attempts to 6
     }
 
-    public void SaveGame()
+    public void SaveGame()//attached to button
     {
-        SaveSystem.SaveGame();
+        SaveSystem.SaveGame(); //save file
     }
 
-    public void LoadGame()
+    public void LoadGame()//attached to button
     {
-        SaveSystem.LoadGame();
+        SaveSystem.LoadGame(); //load file
     }
 
 
@@ -70,38 +71,40 @@ public class ChangeSceneScripts : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     public static class SaveSystem
     {
-        private static string savePath = Application.persistentDataPath + "/savefile.json";
+        private static string savePath = Application.persistentDataPath + "/savefile.json"; //write the file and file save path
 
-        public static void SaveGame()
+        public static void SaveGame()//save game funtion
         {
-            SaveData data = new SaveData
+            SaveData data = new SaveData //save data varible and what varibles are going into the file
             {
-                chosenDifficulty = LetterRemove.chosenDifficulty,
-                playerScore = LetterRemove.playerScore,
-                attemptsRemaining = LetterRemove.attemptsRemaining
+                chosenDifficulty = LetterRemove.chosenDifficulty, //varible assign
+                playerScore = LetterRemove.playerScore, //varible assign
+                attemptsRemaining = LetterRemove.attemptsRemaining, //varible assign
+                chosenWord = LetterRemove.chosenWord //varible assign
             };
 
-            string json = JsonUtility.ToJson(data, true);
-            File.WriteAllText(savePath, json);
-            Debug.Log("Game saved to: " + savePath);
+            string json = JsonUtility.ToJson(data, true); //set the save data into the json file 
+            File.WriteAllText(savePath, json); // write the save file
+            Debug.Log("Game saved to: " + savePath); //debug where the save path is
         }
 
-        public static void LoadGame()
+        public static void LoadGame()// load game funtion
         {
-            if (File.Exists(savePath))
+            if (File.Exists(savePath))// if the file exists in the save path
             {
-                string json = File.ReadAllText(savePath);
-                SaveData data = JsonUtility.FromJson<SaveData>(json);
+                string json = File.ReadAllText(savePath);//read the file at the save path
+                SaveData data = JsonUtility.FromJson<SaveData>(json);//convert data to a string
 
-                LetterRemove.chosenDifficulty = data.chosenDifficulty;
-                LetterRemove.playerScore = data.playerScore;
-                LetterRemove.attemptsRemaining = data.attemptsRemaining;
+                LetterRemove.chosenDifficulty = data.chosenDifficulty; //set data to varible
+                LetterRemove.playerScore = data.playerScore;//set data to varible
+                LetterRemove.attemptsRemaining = data.attemptsRemaining;//set data to varible
+                LetterRemove.chosenWord = data.chosenWord;//set data to varible
 
-                Debug.Log("Game loaded.");
+                Debug.Log("Game loaded.");//check game loaded
             }
             else
             {
-                Debug.LogWarning("Save file not found.");
+                Debug.LogWarning("Save file not found.");//save file not found
             }
         }
     }

@@ -26,7 +26,7 @@ namespace Letters //namespace
         string filePath;
 
         //find word in difficulty
-        public string chosenWord; // word chosen from difficluty
+        public static string chosenWord; // word chosen from difficluty
         public char[] charaters; // to have charaters seperate from chosen word as a charater array
 
         //display prefabs
@@ -71,7 +71,7 @@ namespace Letters //namespace
 
         //for displaying and holding letter
         public Text _letterConfirm;//display the letter for confirming
-        private string pendingLetter = "";
+        private string pendingLetter = "";//string set to nothing
 
 
         private void Start()//on game start
@@ -179,44 +179,44 @@ namespace Letters //namespace
 
         void KeyPressed()
         {
-            Event currentEvent = Event.current;//
+            Event currentEvent = Event.current;//sets a varible for current event
 
-            if (currentEvent.isKey && Input.GetKeyDown(currentEvent.keyCode))
+            if (currentEvent.isKey && Input.GetKeyDown(currentEvent.keyCode))//when key is pressed
             {
-                KeyCode key = currentEvent.keyCode;
+                KeyCode key = currentEvent.keyCode;//key is the varible for the key pressed
 
                 // Check for ENTER key
-                if (key == KeyCode.Return || key == KeyCode.KeypadEnter)
+                if (key == KeyCode.Return || key == KeyCode.KeypadEnter)//checks enter key
                 {
-                    if (!gameOver && !string.IsNullOrEmpty(pendingLetter))
+                    if (!gameOver && !string.IsNullOrEmpty(pendingLetter))//if game is not over and there is no letter in letter pending
                     {
-                        string inputLetter = pendingLetter.ToLower();
+                        string inputLetter = pendingLetter.ToLower();//have a letter stored in a private area 
                         _letterConfirm.text = ""; // clear letter display
 
-                        if (lettersGuessed.Contains(inputLetter) || lettersWrong.Contains(inputLetter))
+                        if (lettersGuessed.Contains(inputLetter) || lettersWrong.Contains(inputLetter))//if letter is guessed withing teh two lists of letters guessed
                         {
-                            Debug.Log("Letter already guessed.");
+                            Debug.Log("Letter already guessed.");//debug for game editor section to check if working
                             return;
                         }
 
-                        if (chosenWord.ToLower().Contains(inputLetter))
+                        if (chosenWord.ToLower().Contains(inputLetter))//see if the chosen word has the letter guessed
                         {
-                            lettersGuessed.Add(inputLetter);
-                            for (int i = 0; i < chosenWord.Length; i++)
+                            lettersGuessed.Add(inputLetter);//add the letter input to the lettes guessed list
+                            for (int i = 0; i < chosenWord.Length; i++)//chosen word lengh check if the word is full/guessed and add one for every letter guessed correctly
                             {
-                                if (chosenWord[i].ToString().ToLower() == inputLetter)
+                                if (chosenWord[i].ToString().ToLower() == inputLetter)//
                                 {
-                                    prefabSpawnedText[i].text = inputLetter.ToUpper();
+                                    prefabSpawnedText[i].text = inputLetter.ToUpper();//display letter guessed as an upercase letter on the prefab
                                 }
                             }
-                            WinCondition();
-                        }
+                            WinCondition();//run win condition function
+                        }//end if
                         else
                         {
-                            lettersWrong.Add(inputLetter);
-                            _wrongGuesses.text = string.Join(" ", lettersWrong);
-                            attemptsRemaining -= 1;
-                            AttemptsRemaining(GetAttemptsRemaining());
+                            lettersWrong.Add(inputLetter);//add wrong guesses to this list
+                            _wrongGuesses.text = string.Join(" ", lettersWrong);//
+                            attemptsRemaining -= 1;//get rid of one attempt point
+                            AttemptsRemaining(GetAttemptsRemaining());//change attempts remianing score
                         }
 
                         pendingLetter = ""; // clear after processing
@@ -225,8 +225,8 @@ namespace Letters //namespace
                 // If letter key pressed (and not Enter), store the letter
                 else if (key.ToString().Length == 1 && char.IsLetter(key.ToString()[0]))
                 {
-                    pendingLetter = key.ToString().ToLower();
-                    _letterConfirm.text = $"{pendingLetter}";
+                    pendingLetter = key.ToString().ToLower();//set the pending letter to a lowercase letter
+                    _letterConfirm.text = $"{pendingLetter}";//display letter in press to enter key
                 }
             }
         }
@@ -245,17 +245,17 @@ namespace Letters //namespace
             Debug.Log(charaters.Length); //shows the amount of charaters in the debug log
 
             //shows the text display of teh chartater point
-            textDisplay = new Text[charaters.Length];
-            for (int i = 0; i < charaters.Length; i++)
+            textDisplay = new Text[charaters.Length]; //create text of the word in text
+            for (int i = 0; i < charaters.Length; i++)//
             {
                 
-                Text currentLetter = Instantiate(characterDisplayPrefab,spawanLocation).GetComponentInChildren<Text>();
-                textDisplay[i] = currentLetter;
-                prefabSpawnedText.Add(currentLetter);
+                Text currentLetter = Instantiate(characterDisplayPrefab,spawanLocation).GetComponentInChildren<Text>();//add text and ammount of charaters as the 
+                textDisplay[i] = currentLetter; //
+                prefabSpawnedText.Add(currentLetter); //
             }
 
-            attemptsRemaining = 6;
-            AttemptsRemaining(GetAttemptsRemaining());
+            attemptsRemaining = 6;//set attemps remaining to 6
+            AttemptsRemaining(GetAttemptsRemaining()); //display updated attemps remaining
             
         }
 
@@ -265,66 +265,69 @@ namespace Letters //namespace
         void SelectTextFile()
         {
             
-            selectedDifficultyIndex = chosenDifficulty;
-            selectedDifficulty = difficulty[selectedDifficultyIndex];
-            filePath = $"{Application.dataPath}/Words/{selectedDifficulty}.txt";
-            Debug.Log(filePath);
+            selectedDifficultyIndex = chosenDifficulty;//chosen difficulty from difficulty select to the name chosenDifficuty
+
+            selectedDifficulty = difficulty[selectedDifficultyIndex];//selected difficulty index point
+
+            filePath = $"{Application.dataPath}/Words/{selectedDifficulty}.txt"; //check the file path for difficulty location
+
+            Debug.Log(filePath); //show the file path in debug log
         }
 
-        //file path find
+        //file path find and read text
         string ReadTextFile()
         {
-            return File.ReadAllText(filePath);
+            return File.ReadAllText(filePath);//reads the text in the chosen difficulty point
         }
 
         //read words in the file
-        private string SplitTextFile(string words)
+        private string SplitTextFile(string words) //split the words
         {
-            string[] wordsInFile = words.Split('|');
-            string chooseWord = wordsInFile[Random.Range(0, wordsInFile.Length)];
-            return chooseWord;
+            string[] wordsInFile = words.Split('|');//remove | from the file as a point between word
+            string chooseWord = wordsInFile[Random.Range(0, wordsInFile.Length)]; //random word chosen from file seperated by |
+            return chooseWord;//return the chosen word
         }
 
-        private int GetAttemptsRemaining()
+        private int GetAttemptsRemaining()//holds the varible attempsRemaining
         {
 
-            return attemptsRemaining;
+            return attemptsRemaining;//holds the varible
         }
 
         //shows attempts dislpay
         void AttemptsRemaining(int attemptsRemaining)
         {
-            attemptsText.text = attemptsRemaining.ToString();
+            attemptsText.text = attemptsRemaining.ToString();//chnages the number of attempts remaining to a string to display on the attemptsText text
         }
 
 
-        private int GetPlayerScore()
+        private int GetPlayerScore()//holds the varible playerScore
         {
-            return playerScore;
+            return playerScore;//holds the varible
         }
 
         void PlayerScoreChange(int playerScore)
         {
-            scoreText.text = playerScore.ToString();
+            scoreText.text = playerScore.ToString();//chnages the number of PlayerScore to a string to display scoreText text
         }
         
         //win condidtion
         void WinCondition()
         {
-            foreach (char c in chosenWord)
+            foreach (char c in chosenWord)//checks all letters in word are filled in
             {
                 if (!lettersGuessed.Contains(c.ToString().ToUpper()) && !lettersGuessed.Contains(c.ToString().ToLower()))
                 {
                     return;
                 }
             }
+
+            Debug.Log("You Win!");//debug to see if woking
+            gameOver = true;//set the game over to true to stop inputs from keyboard
             
-            Debug.Log("You Win!");
-            gameOver = true;
-            
-            playerScore += 1;
-            PlayerScoreChange(GetPlayerScore());
-            this._winScreen.SetActive(true); ;
+            playerScore += 1;//add a point to player score
+            PlayerScoreChange(GetPlayerScore());//change the number of the text in player score
+            this._winScreen.SetActive(true); //set the winscreen to true to show the winscreen
             
             
         }

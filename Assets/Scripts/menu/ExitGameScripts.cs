@@ -8,12 +8,13 @@ public class ExitGameScripts : MonoBehaviour
 
     
 
-    public void ExitToDesktop()
+    public void ExitToDesktop()//quits to desktop
     {
-        Application.Quit();
+        Application.Quit();//quits to desktop
         
 #if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
+        UnityEditor.EditorApplication.isPlaying = false;//quits the game in the unity player
+
 #endif
         
     }
